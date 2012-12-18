@@ -1,5 +1,11 @@
 package ch.znerol.pdftickbox;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -15,6 +21,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping(value = "/fill")
 public class FillController {
+	@Inject
+	private TemplateResolver templateResolver;
+
+	@Inject
+	private FormFiller formFillService;
+
 	private static final Logger logger = LoggerFactory.getLogger(FillController.class);
 
     /**
@@ -37,10 +49,14 @@ public class FillController {
 
 	/**
 	 * Return a PDF derived from the template by filling in the values provided.
+	 * @throws FormFillerException
+	 * @throws IOException
+	 * @throws TemplateResolverException
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public void getPDF(@Validated Fill fill, Model model) {
-		logger.info("template: " + fill.getTemplate());
-		logger.info("values: " + fill.getValues());
+	public void getPDF(@Validated Fill fill, HttpServletResponse response) throws FormFillerException, TemplateResolverException, IOException {
+		InputStream template = templateResolver.open(fill.getTemplate());
+		response.setContentType(formFillService.getContentType());
+		formFillService.fill(template, response.getOutputStream(), fill.getValues());
 	}
 }
