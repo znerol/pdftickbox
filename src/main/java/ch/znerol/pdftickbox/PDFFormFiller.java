@@ -36,7 +36,7 @@ public class PDFFormFiller implements FormFiller {
 			fdf = FDFDocument.loadXFDF(
 					new ByteArrayInputStream(values.getBytes("UTF-8")));
 		} catch (IOException e) {
-			throw new FormFillerException("Failed load XFDF", e);
+			throw new FormFillerException("Failed to load XFDF", e);
 		}
 
 		ImportXFDF stamper;
@@ -44,7 +44,7 @@ public class PDFFormFiller implements FormFiller {
 		try {
 			stamper.importFDF(doc, fdf);
 		} catch (IOException e) {
-			throw new FormFillerException("Failed load fill PDF template with XFDF values", e);
+			throw new FormFillerException("Failed to load fill PDF template with XFDF values", e);
 		}
 
 		try {
