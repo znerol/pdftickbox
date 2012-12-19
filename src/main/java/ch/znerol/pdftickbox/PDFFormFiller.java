@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.pdfbox.ImportXFDF;
+import org.apache.pdfbox.exceptions.COSVisitorException;
+import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.fdf.FDFDocument;
 import org.springframework.stereotype.Component;
-
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.XfdfReader;
 
 @Component
 public class PDFFormFiller implements FormFiller {
@@ -22,47 +22,44 @@ public class PDFFormFiller implements FormFiller {
 
 	@Override
 	public void fill(InputStream template, OutputStream result, String values) throws FormFillerException {
-		PdfReader reader;
+		PDDocument doc;
 		try {
-			reader = new PdfReader(template);
+			PDFParser parser = new PDFParser(template);
+			parser.parse();
+			doc = parser.getPDDocument();
 		} catch (IOException e) {
 			throw new FormFillerException("Failed to read PDF from template", e);
 		}
 
-		XfdfReader fdf;
+		FDFDocument fdf;
 		try {
-			fdf = new XfdfReader(new ByteArrayInputStream(values.getBytes("UTF-8")));
+			fdf = FDFDocument.loadXFDF(
+					new ByteArrayInputStream(values.getBytes("UTF-8")));
 		} catch (IOException e) {
-			throw new FormFillerException("Failed create FDF reader", e);
+			throw new FormFillerException("Failed load XFDF", e);
 		}
 
-		PdfStamper stamper;
+		ImportXFDF stamper;
+		stamper = new ImportXFDF();
 		try {
-			stamper = new PdfStamper(reader, result);
-		} catch (DocumentException e) {
-			throw new FormFillerException("Failed create PDF stamper", e);
+			stamper.importFDF(doc, fdf);
 		} catch (IOException e) {
-			throw new FormFillerException("Failed create PDF stamper", e);
+			throw new FormFillerException("Failed load fill PDF template with XFDF values", e);
 		}
 
 		try {
-			stamper.getAcroFields().setFields(fdf);
+			doc.save(result);
+		} catch (COSVisitorException e) {
+			throw new FormFillerException("Failed to write PDF document", e);
 		} catch (IOException e) {
-			throw new FormFillerException("Failed fill form fields", e);
-		} catch (DocumentException e) {
-			throw new FormFillerException("Failed fill form fields", e);
+			throw new FormFillerException("Failed to write PDF document", e);
 		}
-
-		stamper.setFormFlattening(true);
 
 		try {
-			stamper.close();
-		} catch (DocumentException e) {
-			throw new FormFillerException("Failed to close stamper", e);
+			stamper.close(doc);
+			stamper.close(fdf);
 		} catch (IOException e) {
-			throw new FormFillerException("Failed to close stamper", e);
+			throw new FormFillerException("Failed close document", e);
 		}
-
-        reader.close();
 	}
 }
