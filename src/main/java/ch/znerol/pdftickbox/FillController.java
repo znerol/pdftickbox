@@ -30,8 +30,8 @@ public class FillController {
      * instance for the form.
      */
     @ModelAttribute
-    public Fill newRequest() {
-        return new Fill();
+    public FillParams newRequest() {
+        return new FillParams();
     }
 
 	/**
@@ -39,7 +39,7 @@ public class FillController {
 	 * user.
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public void getForm(@ModelAttribute Fill fill, Model model) {
+	public void getForm(@ModelAttribute FillParams fill, Model model) {
 		model.addAttribute("fill", fill);
 	}
 
@@ -50,7 +50,7 @@ public class FillController {
 	 * @throws TemplateResolverException
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public void getPDF(@Validated Fill fill, HttpServletResponse response) throws FormFillerException, TemplateResolverException, IOException {
+	public void getPDF(@Validated FillParams fill, HttpServletResponse response) throws FormFillerException, TemplateResolverException, IOException {
 		InputStream template = templateResolver.open(fill.getTemplate());
 		response.setContentType(formFillService.getContentType());
 		formFillService.fill(template, response.getOutputStream(), fill.getValues());
