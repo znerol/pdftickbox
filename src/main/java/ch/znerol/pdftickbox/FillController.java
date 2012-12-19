@@ -6,8 +6,6 @@ import java.io.InputStream;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -26,8 +24,6 @@ public class FillController {
 
 	@Inject
 	private FormFiller formFillService;
-
-	private static final Logger logger = LoggerFactory.getLogger(FillController.class);
 
     /**
      * For every request for this controller, this will create a new fill

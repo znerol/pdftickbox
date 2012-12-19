@@ -5,6 +5,7 @@
 
 	<!-- Root Context: defines shared resources visible to all other web components -->
 
+	<!-- Enable properties and context params in SpEL expressions -->
     <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer" />
 
 	<bean id="templateResolver" class="ch.znerol.pdftickbox.TemplateDirectory">
